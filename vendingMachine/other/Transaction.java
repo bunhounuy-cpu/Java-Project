@@ -1,5 +1,8 @@
+package other;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import user.Customer;
 
 public class Transaction {
     private Customer customer;

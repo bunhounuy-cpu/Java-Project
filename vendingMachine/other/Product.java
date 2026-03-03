@@ -1,3 +1,5 @@
+package other;
+
 public class Product {
     private static int productCounter = 0;
     private int id;

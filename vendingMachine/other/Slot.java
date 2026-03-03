@@ -1,3 +1,5 @@
+package other;
+
 public class Slot {
     private String slotID;
     private Product product;
