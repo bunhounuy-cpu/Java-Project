@@ -21,7 +21,7 @@ public class Manager extends User {
 
     public void setSalary(float salary) {
         if(salary < 1000) {
-            System.out.println("Salary can not be negative!");
+            System.out.println("Salary can not be less than zero!");
         } else {
             this.salary = salary;
         }

@@ -8,22 +8,17 @@ public class Restocker extends User {
 
     @Override
     public boolean can(String action) {
-        switch (action) {
-            case VendingMachine.RESTOCK:
-            case VendingMachine.VIEW_MENU:
-            case VendingMachine.VIEW_INVENTORY:
-            case VendingMachine.PURCHASE:
-            case VendingMachine.VIEW_BALANCE:
-            case VendingMachine.TOP_UP:
-            case VendingMachine.REDEEM_POINTS:
-            case VendingMachine.MANAGE_PRODUCTS:
-                return true;
-            case VendingMachine.VIEW_REVENUE:
-            case VendingMachine.VIEW_TRANSACTIONS:
-                return false;
-            default:
-                return false;
+        if (VendingMachine.RESTOCK.equals(action) ||
+            VendingMachine.VIEW_MENU.equals(action) ||
+            VendingMachine.VIEW_INVENTORY.equals(action) ||
+            VendingMachine.PURCHASE.equals(action) ||
+            VendingMachine.VIEW_BALANCE.equals(action) ||
+            VendingMachine.TOP_UP.equals(action) ||
+            VendingMachine.REDEEM_POINTS.equals(action) ||
+            VendingMachine.MANAGE_PRODUCTS.equals(action)) {
+            return true;
         }
+        return false;
     }
 
     // ====== Constructor ======
@@ -38,7 +33,7 @@ public class Restocker extends User {
 
     public void setSalary(float salary) {
         if(salary < 0) {
-            System.out.println("Salary can not be negative!");
+            System.out.println("Salary can not be less than zero!");
         } else {
             this.salary = salary;
         }

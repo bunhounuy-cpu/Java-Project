@@ -44,9 +44,6 @@ public class vmMain {
 
                         System.out.print("Card Number: ");
                         String cardNumber = sc.nextLine();
-
-                        System.out.print("CVV: ");
-                        String cardNumber2 = sc.nextLine();
                         
                         System.out.print("Premium? (1=Yes, 0=No): ");
                         int premiumChoice = sc.nextInt();
@@ -76,111 +73,6 @@ public class vmMain {
                         }
                         break;
                     }
-
-                    case 4: {
-                        // Collection Demonstrations
-                        System.out.println("=== COLLECTION DEMO ===");
-                        System.out.println("1. Customer Purchase");
-                        System.out.println("2. Manager Functions");
-                        System.out.println("3. Restocker Functions");
-                        System.out.println("4. Exit to Main Menu");
-                        System.out.print("Choose: ");
-                        int demoChoice = sc.nextInt();
-                        sc.nextLine();
-
-                        switch (demoChoice) {
-                            case 1: {
-                                // Customer purchase
-                                System.out.print("Customer Name: ");
-                                String name = sc.nextLine();
-
-                                System.out.print("Card Number: ");
-                                String cardNumber = sc.nextLine();
-
-                                System.out.print("CVV: ");
-                                String cardNumber2 = sc.nextLine();
-                                
-                                System.out.print("Premium? (1=Yes, 0=No): ");
-                                int premiumChoice = sc.nextInt();
-                                sc.nextLine();
-                                boolean isPremium = (premiumChoice == 1);
-                                
-                                System.out.print("Initial Balance: ");
-                                double balance = sc.nextDouble();
-                                sc.nextLine();
-                                
-                                User baseCustomer = new User("C001", name, cardNumber, cardNumber, cardNumber);
-                                Customer customer = new Customer(baseCustomer);
-                                customer.setPremium(isPremium);
-                                customer.setBalance(balance);
-                                
-                                vm.addUser(customer);
-                                
-                                vm.printMenu();
-                                System.out.print("Enter Slot ID: ");
-                                String slotId = sc.nextLine();
-                                
-                                boolean success = vm.vend(slotId, customer);
-                                if (success) {
-                                    System.out.println("Purchase successful! New balance: $" + customer.getBalance());
-                                } else {
-                                    System.out.println("Purchase failed!");
-                                }
-                                break;
-                            }
-
-                            case 2: {
-                                // Manager functions
-                                System.out.print("Manager Username: ");
-                                String mgrUsername = sc.nextLine();
-
-                                System.out.print("Manager Password: ");
-                                String mgrPassword = sc.nextLine();
-                                
-                                User baseManager = new User("M001", "System Manager", "555-5555", "555-5555", "manager123");
-                                Manager manager = new Manager(baseManager, 1500.0f);
-                                
-                                vm.addUser(manager);
-                                
-                                System.out.println("Manager logged in successfully!");
-                                break;
-                            }
-
-                            case 3: {
-                                // Restocker functions
-                                System.out.print("Restocker Username: ");
-                                String restUsername = sc.nextLine();
-
-                                System.out.print("Restocker Password: ");
-                                String restPassword = sc.nextLine();
-                                
-                                User baseRestocker = new User("R001", "System Restocker", "777-7777", "777-7777", "restocker123");
-                                Restocker restocker = new Restocker(baseRestocker, 800.0f);
-                                
-                                vm.addUser(restocker);
-                                
-                                System.out.println("Restocker logged in successfully!");
-                                break;
-                            }
-
-                            case 4: {
-                                // Exit to main menu
-                                break;
-                            }
-
-                            default:
-                                System.out.println("Invalid choice.");
-                                break;
-                        }
-                    }
-
-                    case 0: {
-                        System.out.println("Goodbye!");
-                        break;
-                    }
-
-                    default:
-                        System.out.println("Invalid choice.");
                 }
 
             } else {

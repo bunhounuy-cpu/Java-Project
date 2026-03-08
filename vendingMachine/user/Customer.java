@@ -5,22 +5,14 @@ public class Customer extends User {
 
     @Override
     public boolean can(String action) {
-        switch (action) {
-            case VendingMachine.PURCHASE:
-            case VendingMachine.VIEW_MENU:
-            case VendingMachine.VIEW_BALANCE:
-            case VendingMachine.TOP_UP:
-            case VendingMachine.REDEEM_POINTS:
-                return true;
-            case VendingMachine.RESTOCK:
-            case VendingMachine.VIEW_REVENUE:
-            case VendingMachine.MANAGE_PRODUCTS:
-            case VendingMachine.VIEW_TRANSACTIONS:
-            case VendingMachine.VIEW_INVENTORY:
-                return false;
-            default:
-                return false;
+        if (VendingMachine.PURCHASE.equals(action) ||
+            VendingMachine.VIEW_MENU.equals(action) ||
+            VendingMachine.VIEW_BALANCE.equals(action) ||
+            VendingMachine.TOP_UP.equals(action) ||
+            VendingMachine.REDEEM_POINTS.equals(action)) {
+            return true;
         }
+        return false;
     }
 
     // ====== Constructor ======
