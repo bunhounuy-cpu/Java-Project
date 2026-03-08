@@ -6,7 +6,7 @@ public class Manager extends User {
 
     @Override
     public boolean can(String action) {
-        return true; // Manager can do everything
+        return true; 
     }
 
     // ====== Constructor ======

@@ -42,7 +42,7 @@ public class Restocker extends User {
     @Override
     public String toString() {
         return super.toString() + 
-                ", salary=" + salary +
+                "Restocker [\"Position: Staff salary=" + salary +
                 '}';
     }
     
