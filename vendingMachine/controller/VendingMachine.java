@@ -27,7 +27,6 @@ public class VendingMachine {
     private String location;
     private ArrayList<Slot> slots;
     private double revenue;
-    private boolean isOn;
     private ArrayList<Transaction> transactions;
     private ArrayList<User> users;
     private User loggedInUser;
@@ -39,13 +38,20 @@ public class VendingMachine {
         machineCount++;
         setLocation(location);
         this.slots = new ArrayList<>();
-        setRevenue(0.0);
-        setOn(true);
+        this.revenue = 0.0;
         this.transactions = new ArrayList<>();
         this.users = new ArrayList<>();
-        setLoggedInUser(null);
+        this.loggedInUser = null;
+        seedDefaultAdmin();
         
-        // Initialize slots
+        // Initialize slots and default users
+        seedDefaultSlots();
+    }
+    
+    // =========================
+    // DEFAULT SLOTS (BOOTSTRAP)
+    // =========================
+    private void seedDefaultSlots() {
         addSlot("A1", new Product("Chips", "Snack", 1.50), 5);
         addSlot("A2", new Product("Candy", "Snack", 1.00), 5);
         addSlot("B1", new Product("Soda", "Drink", 2.00), 5);
@@ -139,7 +145,7 @@ public class VendingMachine {
     }
     
     public void printTransactions() {
-        if (!getLoggedInUser().can(VIEW_TRANSACTIONS)) return;
+        if (!requirePermission(VIEW_TRANSACTIONS)) return;
         System.out.println("=== " + location + " Transactions ===");
         for (int i = 0; i < transactions.size(); i++) {
             if (transactions.get(i) != null) {
@@ -194,10 +200,6 @@ public class VendingMachine {
         if (revenue >= 0) {
             this.revenue = revenue;
         }
-    }
-    
-    public void setOn(boolean isOn) {
-        this.isOn = isOn;
     }
     
     public void setLoggedInUser(User user) {
