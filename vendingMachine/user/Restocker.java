@@ -1,21 +1,12 @@
 package user;
 
-import controller.VendingMachine;
-
 public class Restocker extends User {
 
-    private float salary;
+    private float restockerSalary;
 
     @Override
     public boolean can(String action) {
-        if (VendingMachine.RESTOCK.equals(action) ||
-            VendingMachine.VIEW_MENU.equals(action) ||
-            VendingMachine.VIEW_INVENTORY.equals(action) ||
-            VendingMachine.PURCHASE.equals(action) ||
-            VendingMachine.VIEW_BALANCE.equals(action) ||
-            VendingMachine.TOP_UP.equals(action) ||
-            VendingMachine.REDEEM_POINTS.equals(action) ||
-            VendingMachine.MANAGE_PRODUCTS.equals(action)) {
+        if (action.equals("VIEW_MENU") || action.equals("RESTOCK") || action.equals("VIEW_INVENTORY") || action.equals("PURCHASE") || action.equals("VIEW_BALANCE") || action.equals("TOP_UP") || action.equals("REDEEM_POINTS") || action.equals("MANAGE_PRODUCTS")) {
             return true;
         }
         return false;
@@ -24,25 +15,25 @@ public class Restocker extends User {
     // ====== Constructor ======
     public Restocker(User u, float salary) {
         super(u.getUserId(), u.getFullName(), u.getPhone(), u.getUsername(), u.getPassword());
-        this.setSalary(salary);
+        this.setRestockerSalary(salary);
     }
 
-    public float getSalary() {
-        return salary;
+    public float getRestockerSalary() {
+        return restockerSalary;
     }
 
-    public void setSalary(float salary) {
+    public void setRestockerSalary(float salary) {
         if(salary < 0) {
-            System.out.println("Salary can not be less than zero!");
+            System.out.println("Restocker salary cannot be less than zero!");
         } else {
-            this.salary = salary;
+            this.restockerSalary = salary;
         }
     }
 
     @Override
     public String toString() {
         return super.toString() + 
-                "Restocker [\"Position: Staff salary=" + salary +
+                "Restocker [salary=" + restockerSalary +
                 '}';
     }
     
@@ -53,15 +44,11 @@ public class Restocker extends User {
 
     @Override
     public boolean equals(Object obj) {
-        Restocker other = (Restocker) obj;
-        
         if (!super.equals(obj)) {
             return false;
-        } else {
-            if (Float.floatToIntBits(salary) != Float.floatToIntBits(other.salary)) {
-                return false;
-            }
-            return true;
         }
+        
+        Restocker other = (Restocker) obj;
+        return Float.floatToIntBits(restockerSalary) == Float.floatToIntBits(other.restockerSalary);
     }
 }

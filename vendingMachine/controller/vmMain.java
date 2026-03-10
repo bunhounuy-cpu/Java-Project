@@ -2,8 +2,6 @@ package controller;
 
 import java.util.Scanner;
 import user.Customer;
-import user.Manager;
-import user.Restocker;
 import user.User;
 
 public class vmMain {
@@ -54,8 +52,7 @@ public class vmMain {
                         double balance = sc.nextDouble();
                         sc.nextLine();
                         
-                        User baseCustomer = new User("C001", name, cardNumber, cardNumber, cardNumber);
-                        Customer customer = new Customer(baseCustomer);
+                        Customer customer = new Customer("C001", name, cardNumber, cardNumber, "1234");
                         customer.setPremium(isPremium);
                         customer.setBalance(balance);
                         
@@ -255,14 +252,6 @@ public class vmMain {
     }
 
     private static String getRoleName(User user) {
-        if (user instanceof Manager) {
-            return "Manager";
-        } else if (user instanceof Restocker) {
-            return "Restocker";
-        } else if (user instanceof Customer) {
-            return "Customer";
-        } else {
-            return "Unknown";
-        }
+        return user.getRole();
     }
 }

@@ -19,10 +19,10 @@ public class VendingMachine {
     public static final String VIEW_REVENUE = "VIEW_REVENUE";
     public static final String MANAGE_PRODUCTS = "MANAGE_PRODUCTS";
     public static final String VIEW_TRANSACTIONS = "VIEW_TRANSACTIONS";
+    public static final String VIEW_INVENTORY = "VIEW_INVENTORY";
     public static final String VIEW_BALANCE = "VIEW_BALANCE";
     public static final String TOP_UP = "TOP_UP";
     public static final String REDEEM_POINTS = "REDEEM_POINTS";
-    public static final String VIEW_INVENTORY = "VIEW_INVENTORY";
     
     private String location;
     private ArrayList<Slot> slots;
@@ -34,27 +34,18 @@ public class VendingMachine {
     
     private static int machineCount = 0;
     
+    // ====== Constructor ======
     public VendingMachine(String location, int capacity) {
-        this.location = location;
+        machineCount++;
+        setLocation(location);
         this.slots = new ArrayList<>();
-        this.revenue = 0.0;
-        this.isOn = true;
+        setRevenue(0.0);
+        setOn(true);
         this.transactions = new ArrayList<>();
         this.users = new ArrayList<>();
-        this.loggedInUser = null;
-        machineCount++;
+        setLoggedInUser(null);
         
-        // Default admin (so system can start)
-        seedDefaultAdmin();
-        
-        // Initialize default products
-        initializeDefaultProducts();
-    }
-    
-    // =========================
-    // DEFAULT PRODUCTS INITIALIZATION
-    // =========================
-    private void initializeDefaultProducts() {
+        // Initialize slots
         addSlot("A1", new Product("Chips", "Snack", 1.50), 5);
         addSlot("A2", new Product("Candy", "Snack", 1.00), 5);
         addSlot("B1", new Product("Soda", "Drink", 2.00), 5);
@@ -63,23 +54,17 @@ public class VendingMachine {
         addSlot("D1", new Product("Juice", "Drink", 2.50), 4);
     }
     
-    
-
     // =========================
     // DEFAULT USERS (BOOTSTRAP)
     // =========================
     private void seedDefaultAdmin() {
-        User adminUser = new User("M001", "System Admin", "admin123", "admin", "admin123");
+        User adminUser = new Customer("M001", "System Admin", "admin123", "admin", "admin123");
         Manager admin = new Manager(adminUser, 5000.0f);
         users.add(admin);
     }
     
     public static int getMachineCount() {
         return machineCount;
-    }
-    
-    public String getLocation() {
-        return location;
     }
     
     public double getRevenue() {
@@ -99,19 +84,42 @@ public class VendingMachine {
             s.addQuantity(amount);
         }
     }
-    
         
     public Slot findSlot(String slotID) {
         for (int i = 0; i < slots.size(); i++) {
-            if (slots.get(i) != null && slots.get(i).getSlotID().equals(slotID)) {
-                return slots.get(i);
+            if (slots.get(i) != null) {
+                Slot s = slots.get(i);
+                if (s.getSlotID().equals(slotID)) {
+                    return s;
+                }
             }
         }
         return null;
     }
     
+    public boolean vend(String slotID, Customer customer) {
+        if (!requirePermission(PURCHASE)) return false;
+        
+        Slot s = findSlot(slotID);
+        if (s == null || s.getQuantity() <= 0) {
+            return false;
+        }
+        
+        double priceToPay = PaymentService.computeWithLoyalty(s.getProduct().getPrice(), customer.isPremium(), customer.getItemsBought());
+        if (!PaymentService.charge(customer, priceToPay)) {
+            return false;
+        }
+        
+        s.addQuantity(-1);
+        revenue += priceToPay;
+        customer.incrementItems();
+        Transaction t = new Transaction(customer, location, slots);
+        t.saveTransaction(slotID, s.getProduct().getName(), priceToPay);
+        transactions.add(t);
+        return true;
+    }
+    
     public void printMenu() {
-        if (!requirePermission(VIEW_MENU)) return;
         System.out.println("=== " + location + " Menu ===");
         for (int i = 0; i < slots.size(); i++) {
             if (slots.get(i) != null) {
@@ -119,28 +127,6 @@ public class VendingMachine {
                 System.out.println(s.getSlotID() + " - " + s.getProduct().getName() + " [" + s.getProduct().getCategory() + "] $" + s.getProduct().getPrice() + " x" + s.getQuantity());
             }
         }
-    }
-    
-    public boolean vend(String slotID, Customer customer) {
-        // Customer class doesn't implement IUser, so no permission check needed
-        if (!isOn) {
-            return false;
-        }
-        Slot s = findSlot(slotID);
-        if (s == null || s.getQuantity() <= 0 || customer == null || !customer.isCardActive()) {
-            return false;
-        }
-        double priceToPay = PaymentService.computeWithLoyalty(s.getProduct().getPrice(), customer.isPremium(), customer.getItemsBought());
-        if (!PaymentService.charge(customer, priceToPay)) {
-            return false;
-        }
-        s.addQuantity(-1);
-        revenue += priceToPay;
-        customer.incrementItems();
-        Transaction t = new Transaction(customer, location, slots);
-        t.record(slotID, s.getProduct().getName(), priceToPay);
-        transactions.add(t);
-        return true;
     }
     
     public void printInventory() {
@@ -153,8 +139,8 @@ public class VendingMachine {
     }
     
     public void printTransactions() {
-        if (!requirePermission(VIEW_TRANSACTIONS)) return;
-        System.out.println("=== Transactions ===");
+        if (!getLoggedInUser().can(VIEW_TRANSACTIONS)) return;
+        System.out.println("=== " + location + " Transactions ===");
         for (int i = 0; i < transactions.size(); i++) {
             if (transactions.get(i) != null) {
                 System.out.println(transactions.get(i).toString());
@@ -166,11 +152,15 @@ public class VendingMachine {
         users.add(user);
     }
     
+    public ArrayList<User> getUsers() {
+        return users;
+    }
+    
     public boolean login(String username, String password) {
         for (User user : users) {
             if (user.getUsername().equals(username) && user.checkPassword(password)) {
                 loggedInUser = user;
-                System.out.println("Login success as " + getRoleName(user));
+                System.out.println("Login success as " + user.getRole());
                 return true;
             }
         }
@@ -180,7 +170,7 @@ public class VendingMachine {
     
     public void logout() {
         if (loggedInUser != null) {
-            System.out.println("Logged out as " + getRoleName(loggedInUser));
+            System.out.println("Logged out as " + loggedInUser.getRole());
             loggedInUser = null;
         }
     }
@@ -193,32 +183,44 @@ public class VendingMachine {
         return loggedInUser != null;
     }
     
-    private String getRoleName(User user) {
-        if (user instanceof Manager) {
-            return "Manager";
-        } else if (user instanceof Restocker) {
-            return "Restocker";
-        } else if (user instanceof Customer) {
-            return "Customer";
-        } else {
-            return "Unknown";
+    // ====== Setters ======
+    public void setLocation(String location) {
+        if (!isBlank(location)) {
+            this.location = location.trim();
         }
     }
     
-    public boolean requirePermission(String action) {
-        if (loggedInUser == null) {
+    public void setRevenue(double revenue) {
+        if (revenue >= 0) {
+            this.revenue = revenue;
+        }
+    }
+    
+    public void setOn(boolean isOn) {
+        this.isOn = isOn;
+    }
+    
+    public void setLoggedInUser(User user) {
+        this.loggedInUser = user;
+    }
+    
+    // Helper method for validation
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+    
+    // Permission checking method
+    private boolean requirePermission(String action) {
+        if (!isUserLoggedIn()) {
             System.out.println("Access denied: No user logged in");
             return false;
         }
-        if (!loggedInUser.can(action)) {
-            System.out.println("Access denied: " + loggedInUser.getRole() + " cannot perform " + action);
+        
+        User user = getLoggedInUser();
+        if (!user.can(action)) {
+            System.out.println("Access denied: " + user.getRole() + " cannot perform " + action);
             return false;
         }
         return true;
     }
-    
-    public ArrayList<User> getUsers() {
-        return users;
-    }
-    
 }

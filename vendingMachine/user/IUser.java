@@ -9,6 +9,8 @@ public interface IUser {
     boolean isPremium();
     double getBalance();
     String getRole();
+    int getItemsBought();
+    int getLoyaltyPoints();
     
     boolean can(String action);
 }

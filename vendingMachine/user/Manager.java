@@ -2,36 +2,38 @@ package user;
 
 public class Manager extends User {
 
-    private float salary;
+    private float managerSalary;
 
     @Override
     public boolean can(String action) {
-        return true; 
+        // Manager can do everything
+        return true;
     }
 
     // ====== Constructor ======
     public Manager(User u, float salary) {
         super(u.getUserId(), u.getFullName(), u.getPhone(), u.getUsername(), u.getPassword());
-        this.setSalary(salary);
+        this.setManagerSalary(salary);
     }
 
-    public float getSalary() {
-        return salary;
+    // ====== Manager-Specific Methods ======
+    public float getManagerSalary() {
+        return managerSalary;
     }
 
-    public void setSalary(float salary) {
-        if(salary < 1000) {
-            System.out.println("Salary can not be less than zero!");
+    public void setManagerSalary(float salary) {
+        if (salary < 1000) {
+            System.out.println("Manager salary cannot be less than $1000!");
         } else {
-            this.salary = salary;
+            this.managerSalary = salary;
         }
     }
 
     @Override
     public String toString() {
-        return super.toString() + "ManagerStaff [\"Position: Manager salary=" + salary + "]";
+        return super.toString() + "Manager [salary=" + managerSalary + "]";
     }
-    
+
     @Override
     public String getRole() {
         return "Manager";
@@ -39,15 +41,11 @@ public class Manager extends User {
 
     @Override
     public boolean equals(Object obj) {
-        Manager other = (Manager) obj;
-        
         if (!super.equals(obj)) {
             return false;
-        } else {
-            if (Float.floatToIntBits(salary) != Float.floatToIntBits(other.salary)) {
-                return false;
-            }
-            return true;
         }
+
+        Manager other = (Manager) obj;
+        return Float.floatToIntBits(managerSalary) == Float.floatToIntBits(other.managerSalary);
     }
 }
