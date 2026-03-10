@@ -8,7 +8,6 @@ import other.PaymentService;
 import user.Customer;
 import user.Manager;
 import user.User;
-import user.Restocker;
 
 public class VendingMachine {
     
