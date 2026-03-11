@@ -7,6 +7,7 @@ import other.Product;
 import other.PaymentService;
 import user.Customer;
 import user.Manager;
+import user.Restocker;
 import user.User;
 
 public class VendingMachine {
@@ -63,10 +64,21 @@ public class VendingMachine {
     // DEFAULT USERS (BOOTSTRAP)
     // =========================
     private void seedDefaultAdmin() {
-        User adminUser = new Customer("M001", "System Admin", "admin123", "admin", "admin123");
-        Manager admin = new Manager(adminUser, 5000.0f);
-        users.add(admin);
+        User adminUser = new Manager("M001", "System Admin", "admin123", "admin", "admin123", 500.0f);
+        users.add(adminUser);
     }
+
+    // =========================
+    // DEFAULT USERS (BOOTSTRAP)
+    // =========================
+    private void seedDefaultUser() {
+        User restocker = new Restocker("R001", "Restock Staff", "12345678", "restock", "pass123", 3000.0f);
+        users.add(restocker);
+        // Default Customer with the new unique email field
+        User customer = new Customer("C001", "Test Customer", "87654321", "customer", "pass123", "testcustomer@email.com");
+        users.add(customer);
+    }
+
     
     public static int getMachineCount() {
         return machineCount;

@@ -1,16 +1,16 @@
 package user;
 
 public abstract class User implements IUser {
-    protected String userId;
-    protected String fullName;
-    protected String phone;
-    protected String username;
-    protected String password;
-    protected boolean active;
-    protected double balance;
-    protected boolean premium;
-    protected int itemsBought;
-    protected int loyaltyPoints;
+    private String userId;
+    private String fullName;
+    private String phone;
+    private String username;
+    private String password;
+    private boolean active;
+    private double balance;
+    private boolean premium;
+    private int itemsBought;
+    private int loyaltyPoints;
     
     // ====== Constructor ======
     public User(String userId, String fullName, String phone,
@@ -162,7 +162,7 @@ public abstract class User implements IUser {
         return phone != null ? phone : phone.trim();
     }
     
-    public String getPassword() {
+    protected String getPassword() {
         return password;
     }
     

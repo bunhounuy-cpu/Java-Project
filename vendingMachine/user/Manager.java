@@ -11,8 +11,9 @@ public class Manager extends User {
     }
 
     // ====== Constructor ======
-    public Manager(User u, float salary) {
-        super(u.getUserId(), u.getFullName(), u.getPhone(), u.getUsername(), u.getPassword());
+    public Manager(String userId, String fullName, String phone,
+                    String username, String password, float salary) {
+        super(userId, fullName, phone, username, password);
         this.setManagerSalary(salary);
     }
 

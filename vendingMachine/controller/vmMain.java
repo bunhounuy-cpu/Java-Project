@@ -52,7 +52,10 @@ public class vmMain {
                         double balance = sc.nextDouble();
                         sc.nextLine();
                         
-                        Customer customer = new Customer("C001", name, cardNumber, cardNumber, "1234");
+                        System.out.print("Customer Name: ");
+                        String email = sc.nextLine();
+
+                        Customer customer = new Customer("C001", name, cardNumber, cardNumber, "1234", email);
                         customer.setPremium(isPremium);
                         customer.setBalance(balance);
                         

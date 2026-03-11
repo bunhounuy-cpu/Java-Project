@@ -6,15 +6,23 @@ public class Restocker extends User {
 
     @Override
     public boolean can(String action) {
-        if (action.equals("VIEW_MENU") || action.equals("RESTOCK") || action.equals("VIEW_INVENTORY") || action.equals("PURCHASE") || action.equals("VIEW_BALANCE") || action.equals("TOP_UP") || action.equals("REDEEM_POINTS") || action.equals("MANAGE_PRODUCTS")) {
+        if (action.equals("VIEW_MENU") 
+            || action.equals("RESTOCK") 
+            || action.equals("VIEW_INVENTORY") 
+            || action.equals("PURCHASE") 
+            || action.equals("VIEW_BALANCE") 
+            || action.equals("TOP_UP") 
+            || action.equals("REDEEM_POINTS") 
+            || action.equals("MANAGE_PRODUCTS")) {
             return true;
         }
         return false;
     }
 
     // ====== Constructor ======
-    public Restocker(User u, float salary) {
-        super(u.getUserId(), u.getFullName(), u.getPhone(), u.getUsername(), u.getPassword());
+    public Restocker(String userId, String fullName, String phone,
+                    String username, String password, float salary) {
+        super(userId, fullName, phone, username, password);
         this.setRestockerSalary(salary);
     }
 
