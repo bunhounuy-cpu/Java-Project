@@ -1,6 +1,7 @@
 package other;
 
 import user.Customer;
+import other.PaymentProcessor;
 
 public class PaymentService {
     private static final double PREMIUM_DISCOUNT = 0.10;

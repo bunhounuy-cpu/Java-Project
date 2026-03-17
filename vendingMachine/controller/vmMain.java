@@ -15,6 +15,7 @@ public class vmMain {
             if (!vm.isUserLoggedIn()) {
                 printMainMenu();
                 System.out.print("Choose: ");
+                System.out.println("\n");
                 choice = sc.nextInt();
                 sc.nextLine();
 
@@ -98,6 +99,47 @@ public class vmMain {
         if (user.can(VendingMachine.VIEW_MENU)) {
             if (choice == optionNumber) {
                 vm.printMenu();
+                return;
+            }
+            optionNumber++;
+        }
+        
+        if (user.can(VendingMachine.PURCHASE)) {
+            if (choice == optionNumber) {
+                vm.printMenu();
+                System.out.print("Enter Slot ID: ");
+                String slotId = sc.nextLine();
+                
+                System.out.print("Enter Quantity: ");
+                int quantity = sc.nextInt();
+                sc.nextLine();
+                
+                boolean success = false;
+                int successfulPurchases = 0;
+                
+                for (int i = 0; i < quantity; i++) {
+                    Customer tempCustomer = new Customer("TEMP", user.getFullName(), "0000000000", "temp", "temp", "temp@email.com");
+                    tempCustomer.setBalance(user.getBalance());
+                    tempCustomer.setPremium(user.isPremium());
+                    tempCustomer.setItemsBought(user.getItemsBought());
+                    
+                    success = vm.vend(slotId, tempCustomer);
+                    if (success) {
+                        successfulPurchases++;
+                        // Update the actual user's balance and stats
+                        user.setBalance(tempCustomer.getBalance());
+                        user.setItemsBought(tempCustomer.getItemsBought());
+                        user.setLoyaltyPoints(tempCustomer.getLoyaltyPoints());
+                    } else {
+                        break; // Stop if purchase fails
+                    }
+                }
+                
+                if (successfulPurchases > 0) {
+                    System.out.println("Successfully purchased " + successfulPurchases + " item(s)! New balance: $" + user.getBalance());
+                } else {
+                    System.out.println("Purchase failed! Check your balance or product availability.");
+                }
                 return;
             }
             optionNumber++;
@@ -212,6 +254,11 @@ public class vmMain {
         // Show options based on permissions
         if (user.can(VendingMachine.VIEW_MENU)) {
             System.out.println(optionNumber + ") View Products");
+            optionNumber++;
+        }
+        
+        if (user.can(VendingMachine.PURCHASE)) {
+            System.out.println(optionNumber + ") Purchase Product");
             optionNumber++;
         }
         
