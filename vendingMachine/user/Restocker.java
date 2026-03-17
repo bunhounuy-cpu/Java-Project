@@ -23,7 +23,7 @@ public class Restocker extends User {
     public Restocker(String userId, String fullName, String phone,
                     String username, String password, float salary) {
         super(userId, fullName, phone, username, password);
-        this.setRestockerSalary(salary);
+        setRestockerSalary(salary);
     }
 
     public float getRestockerSalary() {
@@ -45,11 +45,6 @@ public class Restocker extends User {
                 '}';
     }
     
-    @Override
-    public String getRole() {
-        return "Restocker";
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (!super.equals(obj)) {

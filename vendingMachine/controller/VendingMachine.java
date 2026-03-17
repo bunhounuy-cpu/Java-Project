@@ -43,7 +43,7 @@ public class VendingMachine {
         this.users = new ArrayList<>();
         this.loggedInUser = null;
         seedDefaultAdmin();
-        
+        TestUsers();
         // Initialize slots and default users
         seedDefaultSlots();
     }
@@ -71,7 +71,7 @@ public class VendingMachine {
     // =========================
     // DEFAULT USERS (BOOTSTRAP)
     // =========================
-    private void seedDefaultUser() {
+    private void TestUsers() {
         User restocker = new Restocker("R001", "Restock Staff", "12345678", "restock", "pass123", 3000.0f);
         users.add(restocker);
         // Default Customer with the new unique email field
@@ -177,7 +177,7 @@ public class VendingMachine {
         for (User user : users) {
             if (user.getUsername().equals(username) && user.checkPassword(password)) {
                 loggedInUser = user;
-                System.out.println("Login success as " + user.getRole());
+                System.out.println("Login success. Welcome " + user.getFullName() + "!");
                 return true;
             }
         }
@@ -187,7 +187,7 @@ public class VendingMachine {
     
     public void logout() {
         if (loggedInUser != null) {
-            System.out.println("Logged out as " + loggedInUser.getRole());
+            System.out.println("Logged out successfully.");
             loggedInUser = null;
         }
     }
@@ -231,7 +231,7 @@ public class VendingMachine {
         
         User user = getLoggedInUser();
         if (!user.can(action)) {
-            System.out.println("Access denied: " + user.getRole() + " cannot perform " + action);
+            System.out.println("Access denied: you cannot perform " + action);
             return false;
         }
         return true;

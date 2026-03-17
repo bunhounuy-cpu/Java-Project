@@ -14,7 +14,7 @@ public class Manager extends User {
     public Manager(String userId, String fullName, String phone,
                     String username, String password, float salary) {
         super(userId, fullName, phone, username, password);
-        this.setManagerSalary(salary);
+        setManagerSalary(salary);
     }
 
     // ====== Manager-Specific Methods ======
@@ -33,11 +33,6 @@ public class Manager extends User {
     @Override
     public String toString() {
         return super.toString() + "Manager [salary=" + managerSalary + "]";
-    }
-
-    @Override
-    public String getRole() {
-        return "Manager";
     }
 
     @Override

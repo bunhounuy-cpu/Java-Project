@@ -23,17 +23,16 @@ public abstract class User implements IUser {
         setUsername(username);
         setPassword(password);
 
-        // Internal fields - direct assignment
-        this.active = true;
-        this.balance = 0;
-        this.premium = false;
-        this.itemsBought = 0;
-        this.loyaltyPoints = 0;
+        // Internal fields - use setters
+        setActive(true);
+        setBalance(0);
+        setPremium(false);
+        setItemsBought(0);
+        setLoyaltyPoints(0);
     }
     
     // ====== Abstract Methods (only these differ per subclass) ======
     public abstract boolean can(String action);
-    public abstract String getRole();
     
     // ====== Concrete implementations (shared by all users) ======
     @Override
@@ -58,12 +57,12 @@ public abstract class User implements IUser {
     
     @Override
     public String getUserId() {
-        return userId != null ? userId : userId.trim();
+        return userId != null ? userId.trim() : "USER000";
     }
     
     @Override
     public String getUsername() {
-        return username != null ? username : username.trim();
+        return username != null ? username.trim() : "user_" + getUserId();
     }
     
     @Override
@@ -122,7 +121,7 @@ public abstract class User implements IUser {
     }
     
     public void setUsername(String username) {
-        if (isBlank(username)) this.username = "user_" + userId;
+        if (isBlank(username)) this.username = "user_" + getUserId();
         else this.username = username.trim();
     }
     
@@ -159,7 +158,7 @@ public abstract class User implements IUser {
     }
     
     public String getPhone() {
-        return phone != null ? phone : phone.trim();
+        return phone != null ? phone.trim() : "00000000";
     }
     
     protected String getPassword() {

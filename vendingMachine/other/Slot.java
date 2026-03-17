@@ -6,9 +6,9 @@ public class Slot {
     private int quantity;
     
     public Slot(String slotID, Product product, int quantity) {
-        this.slotID = slotID;
-        this.product = product;
-        this.quantity = quantity;
+        setSlotID(slotID);
+        setProduct(product);
+        setQuantity(quantity);
     }
     
     public String getSlotID() {
@@ -24,9 +24,23 @@ public class Slot {
     }
     
     public void addQuantity(int amount) {
-        int next = quantity + amount;
+        int next = getQuantity() + amount;
         if (next >= 0) {
-            quantity = next;
+            setQuantity(next);
+        }
+    }
+    
+    public void setSlotID(String slotID) {
+        this.slotID = slotID;
+    }
+    
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+    
+    public void setQuantity(int quantity) {
+        if (quantity >= 0) {
+            this.quantity = quantity;
         }
     }
     

@@ -8,10 +8,10 @@ public class Product {
     private double price;
     
     public Product(String name, String category, double price) {
-        this.id = ++productCounter;
-        this.name = name;
-        this.category = category;
-        this.price = price;
+        setId(++productCounter);
+        setName(name);
+        setCategory(category);
+        setPrice(price);
     }
     
     public int getId() {
@@ -28,6 +28,22 @@ public class Product {
     
     public double getPrice() {
         return price;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public void setName(String name) {
+        if (name != null && !name.trim().isEmpty()) {
+            this.name = name.trim();
+        }
+    }
+    
+    public void setCategory(String category) {
+        if (category != null && !category.trim().isEmpty()) {
+            this.category = category.trim();
+        }
     }
     
     public boolean setPrice(double newPrice) {

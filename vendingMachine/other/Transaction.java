@@ -24,9 +24,9 @@ public class Transaction {
         setTimestamp(LocalDateTime.now().toString());  // System field - use setter
         setSuccessful(false);  // System field - use setter
         
-        // System fields - direct assignment
-        snapshotPrices = new ArrayList<>();
-        snapshotQty = new ArrayList<>();
+        // System fields - use setters
+        setSnapshotPrices(new ArrayList<>());
+        setSnapshotQty(new ArrayList<>());
         
         // Capture machine state snapshot
         for (int i = 0; i < slots.size(); i++) {
@@ -38,10 +38,10 @@ public class Transaction {
     }
     
     public void saveTransaction(String slotID, String productName, double charged) {
-        this.slotID = slotID;
-        this.productName = productName;
-        this.charged = charged;
-        this.successful = true;
+        setSlotID(slotID);
+        setProductName(productName);
+        setCharged(charged);
+        setSuccessful(true);
     }
     
     public String toString() {
@@ -67,6 +67,26 @@ public class Transaction {
 
     public void setSuccessful(boolean successful) {
         this.successful = successful;
+    }
+
+    public void setSlotID(String slotID) {
+        this.slotID = slotID;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public void setCharged(double charged) {
+        this.charged = charged;
+    }
+
+    public void setSnapshotPrices(ArrayList<Double> snapshotPrices) {
+        this.snapshotPrices = snapshotPrices;
+    }
+
+    public void setSnapshotQty(ArrayList<Integer> snapshotQty) {
+        this.snapshotQty = snapshotQty;
     }
 
     public void printSnapshot() {

@@ -8,7 +8,6 @@ public interface IUser {
     String getFullName();
     boolean isPremium();
     double getBalance();
-    String getRole();
     int getItemsBought();
     int getLoyaltyPoints();
     

@@ -25,11 +25,6 @@ public class Customer extends User {
     }
     
     @Override
-    public String getRole() {
-        return "Customer";
-    }
-    
-    @Override
     public boolean can(String action) {
         if (action.equals("PURCHASE") 
             || action.equals("VIEW_MENU") 

@@ -204,7 +204,7 @@ public class vmMain {
 
     private static void printUserMenu(VendingMachine vm) {
         System.out.println("\n=== USER MENU (Logged In) ===");
-        System.out.println("Logged in as: " + getRoleName(vm.getLoggedInUser()) + " (" + vm.getLoggedInUser().getUsername() + ")");
+        System.out.println("Welcome, " + vm.getLoggedInUser().getFullName() + " (" + vm.getLoggedInUser().getUsername() + ")");
         
         User user = vm.getLoggedInUser();
         int optionNumber = 1;
@@ -252,9 +252,5 @@ public class vmMain {
         
         System.out.println(optionNumber + ") Logout");
         System.out.println("0) Exit");
-    }
-
-    private static String getRoleName(User user) {
-        return user.getRole();
     }
 }
