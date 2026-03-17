@@ -25,6 +25,7 @@ public class VendingMachine {
     public static final String REDEEM_POINTS = "REDEEM_POINTS";
     
     private String location;
+    private int capacity;
     private ArrayList<Slot> slots;
     private double revenue;
     private ArrayList<Transaction> transactions;
@@ -37,13 +38,15 @@ public class VendingMachine {
     public VendingMachine(String location, int capacity) {
         machineCount++;
         setLocation(location);
-        this.slots = new ArrayList<>();
-        this.revenue = 0.0;
-        this.transactions = new ArrayList<>();
-        this.users = new ArrayList<>();
-        this.loggedInUser = null;
+        setCapacity(capacity);
+        setSlots(new ArrayList<>());
+        setRevenue(0.0);
+        setTransactions(new ArrayList<>());
+        setUsers(new ArrayList<>());
+        setLoggedInUser(null);
         seedDefaultAdmin();
         TestUsers();
+        
         // Initialize slots and default users
         seedDefaultSlots();
     }
@@ -90,6 +93,10 @@ public class VendingMachine {
     }
     
     public void addSlot(String slotID, Product product, int quantity) {
+        if (slots.size() >= capacity) {
+            System.out.println("Cannot add slot: Machine capacity reached (" + capacity + " slots max)");
+            return;
+        }
         Slot s = new Slot(slotID, product, quantity);
         slots.add(s);
     }
@@ -215,6 +222,24 @@ public class VendingMachine {
     
     public void setLoggedInUser(User user) {
         this.loggedInUser = user;
+    }
+    
+    public void setCapacity(int capacity) {
+        if (capacity > 0) {
+            this.capacity = capacity;
+        }
+    }
+    
+    public void setSlots(ArrayList<Slot> slots) {
+        this.slots = slots;
+    }
+    
+    public void setTransactions(ArrayList<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+    
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
     }
     
     // Helper method for validation
