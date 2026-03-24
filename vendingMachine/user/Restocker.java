@@ -1,5 +1,7 @@
 package user;
 
+import exceptions.*;
+
 public class Restocker extends User {
 
     private float restockerSalary;
@@ -21,7 +23,7 @@ public class Restocker extends User {
 
     // ====== Constructor ======
     public Restocker(String userId, String fullName, String phone,
-                    String username, String password, float salary) {
+                    String username, String password, float salary) throws InvalidInputException {
         super(userId, fullName, phone, username, password);
         setRestockerSalary(salary);
     }
@@ -30,9 +32,11 @@ public class Restocker extends User {
         return restockerSalary;
     }
 
-    public void setRestockerSalary(float salary) {
+    public void setRestockerSalary(float salary) throws InvalidInputException {
         if(salary < 0) {
-            System.out.println("Restocker salary cannot be less than zero!");
+            throw new InvalidInputException("Restocker salary cannot be negative");
+        } else if (salary > 500000) {
+            throw new InvalidInputException("Restocker salary too high (max $500,000)");
         } else {
             this.restockerSalary = salary;
         }

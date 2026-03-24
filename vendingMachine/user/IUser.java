@@ -9,7 +9,6 @@ public interface IUser {
     boolean isPremium();
     double getBalance();
     int getItemsBought();
-    int getLoyaltyPoints();
     
     boolean can(String action);
 }

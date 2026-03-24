@@ -1,14 +1,15 @@
 package controller;
 
 import java.util.ArrayList;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import other.Slot;
 import other.Transaction;
 import other.Product;
 import other.PaymentService;
 import user.Customer;
-import user.Manager;
-import user.Restocker;
 import user.User;
+import exceptions.*;
 
 public class VendingMachine {
     
@@ -22,7 +23,6 @@ public class VendingMachine {
     public static final String VIEW_INVENTORY = "VIEW_INVENTORY";
     public static final String VIEW_BALANCE = "VIEW_BALANCE";
     public static final String TOP_UP = "TOP_UP";
-    public static final String REDEEM_POINTS = "REDEEM_POINTS";
     
     private String location;
     private int capacity;
@@ -35,51 +35,79 @@ public class VendingMachine {
     private static int machineCount = 0;
     
     // ====== Constructor ======
-    public VendingMachine(String location, int capacity) {
-        machineCount++;
-        setLocation(location);
-        setCapacity(capacity);
-        setSlots(new ArrayList<>());
-        setRevenue(0.0);
-        setTransactions(new ArrayList<>());
-        setUsers(new ArrayList<>());
-        setLoggedInUser(null);
-        seedDefaultAdmin();
-        TestUsers();
-        
-        // Initialize slots and default users
-        seedDefaultSlots();
+    public VendingMachine(String location, int capacity) throws VendingMachineException {
+        try {
+            machineCount++;
+            setLocation(location);
+            setCapacity(capacity);
+            setSlots(new ArrayList<>());
+            setRevenue(0.0);
+            setTransactions(new ArrayList<>());
+            setUsers(new ArrayList<>());
+            setLoggedInUser(null);
+            seedDefaultAdmin();
+            TestUsers();
+            
+            // Initialize slots and default users
+            seedDefaultSlots();
+        } catch (Exception e) {
+            throw new VendingMachineException("Failed to initialize vending machine: " + e.getMessage(), e);
+        }
     }
     
     // =========================
     // DEFAULT SLOTS (BOOTSTRAP)
     // =========================
     private void seedDefaultSlots() {
-        addSlot("A1", new Product("Chips", "Snack", 1.50), 5);
-        addSlot("A2", new Product("Candy", "Snack", 1.00), 5);
-        addSlot("B1", new Product("Soda", "Drink", 2.00), 5);
-        addSlot("B2", new Product("Water", "Drink", 1.25), 6);
-        addSlot("C1", new Product("Gum", "Snack", 0.75), 10);
-        addSlot("D1", new Product("Juice", "Drink", 2.50), 4);
+        // Load slots from database for this machine
+        System.out.println("DEBUG: Attempting to load slots for machine location: " + location);
+        try {
+            // Find machine ID by location
+            int machineId = getMachineIdByLocation(location);
+            System.out.println("DEBUG: Found machine ID: " + machineId);
+            if (machineId != -1) {
+                ArrayList<Slot> dbSlots = MySQL_DATABASE.loadSlots(machineId);
+                for (Slot slot : dbSlots) {
+                    slots.add(slot);
+                }
+                System.out.println("DEBUG: Loaded " + dbSlots.size() + " slots from database for machine: " + location);
+            } else {
+                System.out.println("DEBUG: No machine found with location: " + location);
+            }
+        } catch (DatabaseConnectionException e) {
+            System.out.println("Database connection failed: " + e.getMessage());
+            // Continue without database slots - machine will work with empty inventory
+        } catch (Exception e) {
+            System.out.println("Error loading slots from database: " + e.getMessage());
+            // Continue without database slots - machine will work with empty inventory
+        }
     }
     
     // =========================
     // DEFAULT USERS (BOOTSTRAP)
     // =========================
     private void seedDefaultAdmin() {
-        User adminUser = new Manager("M001", "System Admin", "admin123", "admin", "admin123", 500.0f);
-        users.add(adminUser);
+        // Load all users from database
+        try {
+            ArrayList<User> dbUsers = MySQL_DATABASE.loadUsers();
+            for (User user : dbUsers) {
+                users.add(user);
+            }
+            System.out.println("Loaded " + dbUsers.size() + " users from database");
+        } catch (DatabaseConnectionException e) {
+            System.out.println("Database connection failed: " + e.getMessage());
+            // Continue without database users - machine will work with no users
+        } catch (Exception e) {
+            System.out.println("Error loading users from database: " + e.getMessage());
+            // Continue without database users - machine will work with no users
+        }
     }
 
     // =========================
     // DEFAULT USERS (BOOTSTRAP)
     // =========================
     private void TestUsers() {
-        User restocker = new Restocker("R001", "Restock Staff", "12345678", "restock", "pass123", 3000.0f);
-        users.add(restocker);
-        // Default Customer with the new unique email field
-        User customer = new Customer("C001", "Test Customer", "87654321", "customer", "pass123", "testcustomer@email.com");
-        users.add(customer);
+        // Users are now loaded from database in seedDefaultAdmin()
     }
 
     
@@ -87,26 +115,68 @@ public class VendingMachine {
         return machineCount;
     }
     
+    // Helper method to get machine ID by location
+    private int getMachineIdByLocation(String location) throws DatabaseConnectionException {
+        if (location == null || location.trim().isEmpty()) {
+            throw new DatabaseConnectionException("Location cannot be null or empty");
+        }
+        
+        String query = "SELECT machine_id FROM vending_machines WHERE location = '" + location + "'";
+        try {
+            ResultSet rs = MySQL_DATABASE.executeQuery(query);
+            if (rs != null && rs.next()) {
+                return rs.getInt("machine_id");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseConnectionException("Error getting machine ID: " + e.getMessage(), e);
+        }
+        return -1; // Not found
+    }
+    
     public double getRevenue() {
         if (!requirePermission(VIEW_REVENUE)) return 0.0;
         return revenue;
     }
     
-    public void addSlot(String slotID, Product product, int quantity) {
-        if (slots.size() >= capacity) {
-            System.out.println("Cannot add slot: Machine capacity reached (" + capacity + " slots max)");
-            return;
+    public void addSlot(String slotID, Product product, int quantity) throws VendingMachineException {
+        if (slotID == null || slotID.trim().isEmpty()) {
+            throw new InvalidInputException("Slot ID cannot be empty");
         }
+        
+        if (product == null) {
+            throw new InvalidInputException("Product cannot be null");
+        }
+        
+        if (quantity < 0) {
+            throw new InvalidInputException("Quantity cannot be negative");
+        }
+        
+        if (slots.size() >= capacity) {
+            throw new VendingMachineException("Cannot add slot: Machine capacity reached (" + capacity + " slots max)");
+        }
+        
         Slot s = new Slot(slotID, product, quantity);
         slots.add(s);
     }
     
-    public void restock(String slotID, int amount) {
+    public void restock(String slotID, int amount) throws VendingMachineException {
         if (!requirePermission(RESTOCK)) return;
-        Slot s = findSlot(slotID);
-        if (s != null && amount > 0) {
-            s.addQuantity(amount);
+        
+        if (slotID == null || slotID.trim().isEmpty()) {
+            throw new InvalidInputException("Slot ID cannot be empty");
         }
+        
+        if (amount <= 0) {
+            throw new InvalidInputException("Amount must be positive");
+        }
+        
+        Slot s = findSlot(slotID);
+        if (s == null) {
+            throw new ProductNotFoundException("Slot not found: " + slotID, slotID);
+        }
+        
+        s.addQuantity(amount);
+        System.out.println("Restocked " + amount + " items to slot " + slotID + ". New quantity: " + s.getQuantity());
     }
         
     public Slot findSlot(String slotID) {
@@ -121,15 +191,32 @@ public class VendingMachine {
         return null;
     }
     
-    public boolean vend(String slotID, Customer customer) {
+    public boolean vend(String slotID, Customer customer) throws VendingMachineException {
         if (!requirePermission(PURCHASE)) return false;
         
+        if (slotID == null || slotID.trim().isEmpty()) {
+            throw new InvalidInputException("Slot ID cannot be empty");
+        }
+        
+        if (customer == null) {
+            throw new InvalidInputException("Customer cannot be null");
+        }
+        
         Slot s = findSlot(slotID);
-        if (s == null || s.getQuantity() <= 0) {
-            return false;
+        if (s == null) {
+            throw new ProductNotFoundException("Product not found in slot: " + slotID, slotID);
+        }
+        
+        if (s.getQuantity() <= 0) {
+            throw new InsufficientStockException("Product out of stock", slotID, 1, 0);
         }
         
         double priceToPay = PaymentService.computeWithLoyalty(s.getProduct().getPrice(), customer.isPremium(), customer.getItemsBought());
+        
+        if (customer.getBalance() < priceToPay) {
+            throw new InsufficientFundsException("Insufficient funds for purchase", priceToPay, customer.getBalance());
+        }
+        
         if (!PaymentService.charge(customer, priceToPay)) {
             return false;
         }
@@ -140,6 +227,58 @@ public class VendingMachine {
         Transaction t = new Transaction(customer, location, slots);
         t.saveTransaction(slotID, s.getProduct().getName(), priceToPay);
         transactions.add(t);
+        return true;
+    }
+    
+    // New method for bulk purchase with single transaction
+    public boolean vendBulk(String slotID, Customer customer, int quantity) throws VendingMachineException {
+        if (!requirePermission(PURCHASE)) return false;
+        
+        if (slotID == null || slotID.trim().isEmpty()) {
+            throw new InvalidInputException("Slot ID cannot be empty");
+        }
+        
+        if (customer == null) {
+            throw new InvalidInputException("Customer cannot be null");
+        }
+        
+        if (quantity <= 0) {
+            throw new InvalidInputException("Quantity must be positive");
+        }
+        
+        Slot s = findSlot(slotID);
+        if (s == null) {
+            throw new ProductNotFoundException("Product not found in slot: " + slotID, slotID);
+        }
+        
+        if (s.getQuantity() < quantity) {
+            throw new InsufficientStockException("Insufficient stock for bulk purchase", slotID, quantity, s.getQuantity());
+        }
+        
+        double pricePerItem = PaymentService.computeWithLoyalty(s.getProduct().getPrice(), customer.isPremium(), customer.getItemsBought());
+        double totalPrice = pricePerItem * quantity;
+        
+        if (customer.getBalance() < totalPrice) {
+            throw new InsufficientFundsException("Insufficient funds for bulk purchase", totalPrice, customer.getBalance());
+        }
+        
+        if (!PaymentService.charge(customer, totalPrice)) {
+            return false;
+        }
+        
+        s.addQuantity(-quantity);
+        revenue += totalPrice;
+        
+        // Add items bought for loyalty calculation
+        for (int i = 0; i < quantity; i++) {
+            customer.incrementItems();
+        }
+        
+        // Create single transaction for the bulk purchase
+        Transaction t = new Transaction(customer, location, slots);
+        t.saveTransaction(slotID, s.getProduct().getName() + " (x" + quantity + ")", totalPrice);
+        transactions.add(t);
+        
         return true;
     }
     
@@ -180,16 +319,26 @@ public class VendingMachine {
         return users;
     }
     
-    public boolean login(String username, String password) {
+    public boolean login(String username, String password) throws AuthenticationException {
+        if (username == null || username.trim().isEmpty()) {
+            throw new AuthenticationException("Username cannot be empty");
+        }
+        
+        if (password == null || password.trim().isEmpty()) {
+            throw new AuthenticationException("Password cannot be empty");
+        }
+        
         for (User user : users) {
             if (user.getUsername().equals(username) && user.checkPassword(password)) {
+                if (!user.isActive()) {
+                    throw new AuthenticationException("Account is suspended", username);
+                }
                 loggedInUser = user;
                 System.out.println("Login success. Welcome " + user.getFullName() + "!");
                 return true;
             }
         }
-        System.out.println("Login failed: Invalid username or password");
-        return false;
+        throw new AuthenticationException("Invalid username or password", username);
     }
     
     public void logout() {
@@ -208,9 +357,11 @@ public class VendingMachine {
     }
     
     // ====== Setters ======
-    public void setLocation(String location) {
+    public void setLocation(String location) throws InvalidInputException {
         if (!isBlank(location)) {
             this.location = location.trim();
+        } else {
+            throw new InvalidInputException("Location cannot be empty");
         }
     }
     
@@ -224,9 +375,11 @@ public class VendingMachine {
         this.loggedInUser = user;
     }
     
-    public void setCapacity(int capacity) {
+    public void setCapacity(int capacity) throws InvalidInputException {
         if (capacity > 0) {
             this.capacity = capacity;
+        } else {
+            throw new InvalidInputException("Capacity must be positive");
         }
     }
     

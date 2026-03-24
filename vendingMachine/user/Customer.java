@@ -1,12 +1,14 @@
 package user;
 
+import exceptions.*;
+
 public class Customer extends User {
 
    private String email; 
 
 
     public Customer(String userId, String fullName, String phone,
-                    String username, String password, String email) {
+                    String username, String password, String email) throws InvalidInputException {
         super(userId, fullName, phone, username, password);
         setEmail(email);
     }
@@ -15,13 +17,21 @@ public class Customer extends User {
         return email;
     }
 
-    public void setEmail(String email){
-        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
-        if (email == null || !email.matches(emailRegex)) {
-            System.out.println("Invalid email format. Update failed.");  
-        }else{
-            this.email = email;
+    public void setEmail(String email) throws InvalidInputException {
+        if (email == null || email.trim().isEmpty()) {
+            throw new InvalidInputException("Email cannot be empty");
         }
+        
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        if (!email.matches(emailRegex)) {
+            throw new InvalidInputException("Invalid email format");
+        }
+        
+        if (email.length() > 100) {
+            throw new InvalidInputException("Email too long (max 100 characters)");
+        }
+        
+        this.email = email.trim();
     }
     
     @Override
@@ -29,8 +39,7 @@ public class Customer extends User {
         if (action.equals("PURCHASE") 
             || action.equals("VIEW_MENU") 
             || action.equals("VIEW_BALANCE") 
-            || action.equals("TOP_UP") 
-            || action.equals("REDEEM_POINTS")) {
+            || action.equals("TOP_UP")) {
             return true;
         }
         return false;
@@ -44,17 +53,17 @@ public class Customer extends User {
     public boolean debit(double amount) {
         if (amount <= 0) return false;
         if (getBalance() < amount) return false;
-        setBalance(getBalance() - amount);
-        return true;
-    }
-    
-    public void addLoyaltyPoints(int points) {
-        if (points > 0) {
-            setLoyaltyPoints(getLoyaltyPoints() + points);
+        try {
+            setBalance(getBalance() - amount);
+            return true;
+        } catch (InvalidInputException e) {
+            // This should not happen since we're subtracting, but handle it anyway
+            System.out.println("Error during debit: " + e.getMessage());
+            return false;
         }
     }
     
-    public void incrementItems() {
+    public void incrementItems() throws InvalidInputException {
         setItemsBought(getItemsBought() + 1);
     }
 }
