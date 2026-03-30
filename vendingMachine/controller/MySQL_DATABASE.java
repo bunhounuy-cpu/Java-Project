@@ -16,7 +16,7 @@ public class MySQL_DATABASE {
 
     private static final String URL = "jdbc:mysql://localhost:3306/vending_machine";
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "@Bunhou2006";
+    private static final String PASSWORD = "";
 
     public static Connection getConnection() throws DatabaseConnectionException {
         if (connection == null) {
