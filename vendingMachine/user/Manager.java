@@ -12,13 +12,14 @@ public class Manager extends User {
         return true;
     }
 
-    public Manager(String userId, String fullName, String phone,
-                   String username, String password, float salary) throws InvalidInputException {
+    public Manager(String userId, String fullName, String phone, String username, String password, float salary) throws InvalidInputException {
         super(userId, fullName, phone, username, password);
         setManagerSalary(salary);
     }
 
-    public float getManagerSalary() { return managerSalary; }
+    public float getManagerSalary() {
+        return managerSalary;
+    }
 
     public void setManagerSalary(float salary) throws InvalidInputException {
         if (salary < 1000)

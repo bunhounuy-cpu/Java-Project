@@ -18,7 +18,6 @@ public class VendingMachine {
     public static final String VIEW_MENU         = "VIEW_MENU";
     public static final String RESTOCK           = "RESTOCK";
     public static final String VIEW_REVENUE      = "VIEW_REVENUE";
-    public static final String MANAGE_PRODUCTS   = "MANAGE_PRODUCTS";
     public static final String VIEW_TRANSACTIONS = "VIEW_TRANSACTIONS";
     public static final String VIEW_INVENTORY    = "VIEW_INVENTORY";
     public static final String VIEW_BALANCE      = "VIEW_BALANCE";
@@ -187,7 +186,7 @@ public class VendingMachine {
         if (s.getQuantity() < quantity)
             throw new InsufficientStockException("Not enough stock", slotID, quantity, s.getQuantity());
 
-        double pricePerItem = PaymentService.computeWithLoyalty(
+        double pricePerItem = PaymentService.computeFinalPrice(
                 s.getProduct().getPrice(), customer.isPremium(), customer.getItemsBought());
         double totalPrice = pricePerItem * quantity;
 
@@ -200,7 +199,7 @@ public class VendingMachine {
         revenue += totalPrice;
         for (int i = 0; i < quantity; i++) customer.incrementItems();
 
-        Transaction t = new Transaction(customer, location, slots);
+        Transaction t = new Transaction(customer, location);
         t.saveTransaction(slotID, s.getProduct().getName() + " (x" + quantity + ")", totalPrice);
         transactions.add(t);
         return true;

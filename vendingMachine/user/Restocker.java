@@ -25,8 +25,7 @@ public class Restocker extends User {
         }
     }
 
-    public Restocker(String userId, String fullName, String phone,
-                     String username, String password, float salary) throws InvalidInputException {
+    public Restocker(String userId, String fullName, String phone, String username, String password, float salary) throws InvalidInputException {
         super(userId, fullName, phone, username, password);
         setRestockerSalary(salary);
     }

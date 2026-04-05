@@ -4,11 +4,9 @@ import exceptions.*;
 
 public class Customer extends User {
 
-   private String email; 
+    private String email; 
 
-
-    public Customer(String userId, String fullName, String phone,
-                    String username, String password, String email) throws InvalidInputException {
+    public Customer(String userId, String fullName, String phone, String username, String password, String email) throws InvalidInputException {
         super(userId, fullName, phone, username, password);
         setEmail(email);
     }

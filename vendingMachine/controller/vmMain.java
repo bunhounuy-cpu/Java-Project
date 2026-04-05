@@ -28,7 +28,7 @@ public class vmMain {
                     printMainMenu();
                     choice = readInt(sc, "Choose: ", 0, 2);
 
-                    switch (choice) {
+                    switch (choice) {   
                         case 1: registerUser(vm, sc); break;
                         case 2: loginUser(vm, sc);    break;
                         case 0: System.out.println("Goodbye!"); break;
@@ -55,22 +55,19 @@ public class vmMain {
     }
 
     // =========================================================
-    // LOGIN  — stays in the login loop until success or user
-    //          types "back" to return to the main menu
+    // LOGIN
     // =========================================================
     private static void loginUser(VendingMachine vm, Scanner sc) {
-        System.out.println("\n=== Login === (type 'back' to cancel)");
+        System.out.println("\n=== Login ===");
         while (true) {
             System.out.print("Username: ");
             String username = sc.nextLine().trim();
-            if (username.equalsIgnoreCase("back")) return;
             if (username.isEmpty()) {
                 System.out.println("Username cannot be empty. Please try again.");
                 continue;
             }
 
             String password = readPassword(sc, "Password: ");
-            if (password.equalsIgnoreCase("back")) return;
             if (password.isEmpty()) {
                 System.out.println("Password cannot be empty. Please try again.");
                 continue;
@@ -81,13 +78,12 @@ public class vmMain {
                 return; // success
             } catch (AuthenticationException e) {
                 System.out.println("Login failed: " + e.getMessage() + ". Please try again.");
-                // stays in the loop — does NOT go back to main menu
             }
         }
     }
 
     // =========================================================
-    // REGISTRATION — field-by-field, each field loops until valid
+    // REGISTRATION
     // =========================================================
     private static void registerUser(VendingMachine vm, Scanner sc) {
         System.out.println("\n=== User Registration ===");
@@ -271,32 +267,12 @@ public class vmMain {
                         break;
                     }
 
-                    // Quantity — default 1, must not exceed stock
-                    int available = vm.findSlot(slotId).getQuantity();
-                    if (available == 0) {
+                    // Quantity — default 1
+                    if (vm.findSlot(slotId).getQuantity() == 0) {
                         System.out.println("This item is out of stock.");
                         return;
                     }
-                    int quantity;
-                    while (true) {
-                        System.out.print("Quantity (press Enter for 1): ");
-                        String q = sc.nextLine().trim();
-                        if (q.isEmpty()) { quantity = 1; }
-                        else if (!q.matches("\\d+")) {
-                            System.out.println("Quantity must be a positive integer. Please try again.");
-                            continue;
-                        } else { quantity = Integer.parseInt(q); }
-
-                        if (quantity <= 0) {
-                            System.out.println("Quantity must be greater than 0. Please try again.");
-                            continue;
-                        }
-                        if (quantity > available) {
-                            System.out.println("Not enough stock. Only " + available + " available. Please try again.");
-                            continue;
-                        }
-                        break;
-                    }
+                    int quantity = 1;
 
                     try {
                         Customer proxy = new Customer(user.getUserId(), user.getFullName(),
@@ -621,7 +597,7 @@ public class vmMain {
     // SHARED INPUT HELPERS
     // =========================================================
 
-    /** Read a product name, category, and price — all with retry loops. */
+    // Read a product name, category, and price — all with retry loops.
     private static Product readProductDetails(Scanner sc) {
         String name;
         while (true) {
@@ -655,7 +631,7 @@ public class vmMain {
         return new Product(name, category, price);
     }
 
-    /** Read a positive integer with a custom prompt, retrying on bad input. */
+    // Read a positive integer with a custom prompt, retrying on bad input.
     private static int readPositiveInt(Scanner sc, String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -673,10 +649,8 @@ public class vmMain {
         }
     }
 
-    /**
-     * Read an integer in [0, max] range, reprompting on bad or out-of-range input.
-     * 0 is always allowed as exit.
-     */
+
+    // Read an integer in [0, max] range
     private static int readInt(Scanner sc, String prompt, int min, int max) {
         System.out.print(prompt);
         while (true) {
@@ -695,7 +669,7 @@ public class vmMain {
         }
     }
 
-    /** Read password without echoing. Falls back to visible input in IDEs. */
+    // Read password without echoing. Falls back to visible input in IDEs.
     private static String readPassword(Scanner sc, String prompt) {
         Console console = System.console();
         if (console != null) {
