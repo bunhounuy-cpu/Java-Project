@@ -12,8 +12,8 @@ public class Restocker extends User {
             case "VIEW_MENU":
             case "VIEW_INVENTORY":
             case "RESTOCK":
-            case "ADD_SLOT":
-            case "REMOVE_SLOT":
+            case "ADD_NEW_PRODUCT":
+            case "REMOVE_PRODUCT":
             case "CHANGE_PRODUCT":
             case "PURCHASE":
             case "VIEW_BALANCE":

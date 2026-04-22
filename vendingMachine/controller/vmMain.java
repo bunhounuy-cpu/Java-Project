@@ -14,7 +14,7 @@ public class vmMain {
         VendingMachine vm = null;
 
         try {
-            vm = new VendingMachine("Main Lobby", 12);
+            vm = new VendingMachine("Main Lobby", 12, 10);
         } catch (Exception e) {
             System.out.println("Failed to initialize vending machine: " + e.getMessage());
             sc.close();
@@ -90,13 +90,14 @@ public class vmMain {
     // REGISTRATION — field-by-field, each field loops until valid
     // =========================================================
     private static void registerUser(VendingMachine vm, Scanner sc) {
-        System.out.println("\n=== User Registration ===");
+        System.out.println("\n=== User Registration === (type 'back' to cancel)");
 
         // Full Name — letters and spaces only
         String fullName;
         while (true) {
             System.out.print("Full Name: ");
             fullName = sc.nextLine().trim();
+            if (fullName.equalsIgnoreCase("back")) return;
             if (fullName.isEmpty()) {
                 System.out.println("Full name cannot be empty. Please try again.");
                 continue;
@@ -113,6 +114,7 @@ public class vmMain {
         while (true) {
             System.out.print("Phone Number: ");
             phone = sc.nextLine().trim();
+            if (phone.equalsIgnoreCase("back")) return;
             if (phone.isEmpty()) {
                 System.out.println("Phone number cannot be empty. Please try again.");
                 continue;
@@ -137,6 +139,7 @@ public class vmMain {
         while (true) {
             System.out.print("Username: ");
             username = sc.nextLine().trim();
+            if (username.equalsIgnoreCase("back")) return;
             if (username.isEmpty()) {
                 System.out.println("Username cannot be empty. Please try again.");
                 continue;
@@ -160,6 +163,7 @@ public class vmMain {
         String password;
         while (true) {
             password = readPassword(sc, "Password: ");
+            if (password.equalsIgnoreCase("back")) return;
             if (password.length() < 4) {
                 System.out.println("Password must be at least 4 characters. Please try again.");
                 continue;
@@ -169,6 +173,7 @@ public class vmMain {
                 continue;
             }
             String confirm = readPassword(sc, "Confirm Password: ");
+            if (confirm.equalsIgnoreCase("back")) return;
             if (!password.equals(confirm)) {
                 System.out.println("Passwords do not match. Please try again.");
                 continue;
@@ -181,6 +186,7 @@ public class vmMain {
         while (true) {
             System.out.print("Email: ");
             email = sc.nextLine().trim();
+            if (email.equalsIgnoreCase("back")) return;
             if (email.isEmpty()) {
                 System.out.println("Email cannot be empty. Please try again.");
                 continue;
@@ -205,6 +211,7 @@ public class vmMain {
         while (true) {
             System.out.print("Initial Balance (press Enter for $0.00): ");
             String input = sc.nextLine().trim();
+            if (input.equalsIgnoreCase("back")) return;
             if (input.isEmpty()) { balance = 0.0; break; }
             try {
                 balance = Double.parseDouble(input);
@@ -213,12 +220,13 @@ public class vmMain {
                     continue;
                 }
                 if (balance > 1_000_000) {
-                    System.out.println("Balance too high (max $1,000,000). Please try again.");
+                    System.out.println("Error: '" + input + "' is too high (max $1,000,000). Please try again.");
                     continue;
                 }
                 break;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid amount. Please enter a valid number (e.g. 50.00).");
+                System.out.println("Error: '" + input + "' is not a valid amount.");
+                System.out.println("Please enter a valid number (e.g. 50.00).");
             }
         }
 
@@ -271,32 +279,13 @@ public class vmMain {
                         break;
                     }
 
-                    // Quantity — default 1, must not exceed stock
+                    // Quantity - fixed to 1 (can only buy 1 per time)
                     int available = vm.findSlot(slotId).getQuantity();
                     if (available == 0) {
                         System.out.println("This item is out of stock.");
                         return;
                     }
-                    int quantity;
-                    while (true) {
-                        System.out.print("Quantity (press Enter for 1): ");
-                        String q = sc.nextLine().trim();
-                        if (q.isEmpty()) { quantity = 1; }
-                        else if (!q.matches("\\d+")) {
-                            System.out.println("Quantity must be a positive integer. Please try again.");
-                            continue;
-                        } else { quantity = Integer.parseInt(q); }
-
-                        if (quantity <= 0) {
-                            System.out.println("Quantity must be greater than 0. Please try again.");
-                            continue;
-                        }
-                        if (quantity > available) {
-                            System.out.println("Not enough stock. Only " + available + " available. Please try again.");
-                            continue;
-                        }
-                        break;
-                    }
+                    int quantity = 1;
 
                     try {
                         Customer proxy = new Customer(user.getUserId(), user.getFullName(),
@@ -355,7 +344,7 @@ public class vmMain {
             }
 
             // --- Add Slot ---
-            if (user.can(VendingMachine.ADD_SLOT)) {
+            if (user.can(VendingMachine.ADD_NEW_PRODUCT)) {
                 if (choice == opt) {
                     addSlotFlow(vm, sc);
                     return;
@@ -364,7 +353,7 @@ public class vmMain {
             }
 
             // --- Remove Slot ---
-            if (user.can(VendingMachine.REMOVE_SLOT)) {
+            if (user.can(VendingMachine.REMOVE_PRODUCT)) {
                 if (choice == opt) {
                     removeSlotFlow(vm, sc);
                     return;
@@ -425,12 +414,13 @@ public class vmMain {
                                 continue;
                             }
                             if (user.getBalance() + amount > 1_000_000) {
-                                System.out.println("Balance would exceed maximum ($1,000,000). Please enter a smaller amount.");
+                                System.out.println("Error: '" + a + "' would exceed maximum ($1,000,000). Please enter a smaller amount.");
                                 continue;
                             }
                             break;
                         } catch (NumberFormatException e) {
-                            System.out.println("Invalid amount. Please enter a valid number (e.g. 20.00).");
+                            System.out.println("Error: '" + a + "' is not a valid amount.");
+                            System.out.println("Please enter a valid number (e.g. 20.00).");
                         }
                     }
                     user.setBalance(user.getBalance() + amount);
@@ -588,8 +578,8 @@ public class vmMain {
         if (user.can(VendingMachine.VIEW_MENU))         System.out.println(opt++ + ") View Products");
         if (user.can(VendingMachine.PURCHASE))           System.out.println(opt++ + ") Purchase Product");
         if (user.can(VendingMachine.RESTOCK))            System.out.println(opt++ + ") Restock Products");
-        if (user.can(VendingMachine.ADD_SLOT))           System.out.println(opt++ + ") Add Slot");
-        if (user.can(VendingMachine.REMOVE_SLOT))        System.out.println(opt++ + ") Remove Slot");
+        if (user.can(VendingMachine.ADD_NEW_PRODUCT))           System.out.println(opt++ + ") Add New Product");
+        if (user.can(VendingMachine.REMOVE_PRODUCT))        System.out.println(opt++ + ") Remove Product");
         if (user.can(VendingMachine.CHANGE_PRODUCT))     System.out.println(opt++ + ") Change Product in Slot");
         if (user.can(VendingMachine.VIEW_REVENUE))       System.out.println(opt++ + ") View Revenue");
         if (user.can(VendingMachine.VIEW_TRANSACTIONS))  System.out.println(opt++ + ") View Transactions");
@@ -605,8 +595,8 @@ public class vmMain {
         if (user.can(VendingMachine.VIEW_MENU))         c++;
         if (user.can(VendingMachine.PURCHASE))           c++;
         if (user.can(VendingMachine.RESTOCK))            c++;
-        if (user.can(VendingMachine.ADD_SLOT))           c++;
-        if (user.can(VendingMachine.REMOVE_SLOT))        c++;
+        if (user.can(VendingMachine.ADD_NEW_PRODUCT))           c++;
+        if (user.can(VendingMachine.REMOVE_PRODUCT))        c++;
         if (user.can(VendingMachine.CHANGE_PRODUCT))     c++;
         if (user.can(VendingMachine.VIEW_REVENUE))       c++;
         if (user.can(VendingMachine.VIEW_TRANSACTIONS))  c++;
@@ -645,10 +635,11 @@ public class vmMain {
             String p = sc.nextLine().trim();
             try {
                 price = Double.parseDouble(p);
-                if (price < 0) { System.out.println("Price cannot be negative. Please try again."); continue; }
+                if (price < 0) { System.out.println("Error: '" + p + "' is not a valid price."); continue; }
                 break;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid price. Please enter a valid number (e.g. 1.50).");
+                System.out.println("Error: '" + p + "' is not a valid price.");
+                System.out.println("Please enter a valid number (e.g. 1.50).");
             }
         }
 
@@ -661,12 +652,14 @@ public class vmMain {
             System.out.print(prompt);
             String input = sc.nextLine().trim();
             if (!input.matches("\\d+")) {
+                System.out.println("Error: '" + input + "' is not a positive integer.");
                 System.out.println("Please enter a positive integer. Try again.");
                 continue;
             }
             int val = Integer.parseInt(input);
             if (val <= 0) {
-                System.out.println("Value must be greater than 0. Try again.");
+                System.out.println("Error: '" + input + "' must be greater than 0.");
+                System.out.println("Please enter a positive integer. Try again.");
                 continue;
             }
             return val;
@@ -688,9 +681,11 @@ public class vmMain {
             try {
                 int val = Integer.parseInt(line);
                 if (val == 0 || (val >= min && val <= max)) return val;
-                System.out.print("Invalid choice. Please enter a number between " + min + " and " + max + ": ");
+                System.out.println("Error: '" + line + "' is not a valid choice.");
+                System.out.print("Please enter a number between " + min + " and " + max + ": ");
             } catch (NumberFormatException e) {
-                System.out.print("Invalid input. Please enter a number (" + min + "-" + max + "): ");
+                System.out.println("Error: '" + line + "' is not a valid input.");
+                System.out.print("Please enter a number (" + min + "-" + max + "): ");
             }
         }
     }
