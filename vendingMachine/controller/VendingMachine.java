@@ -102,8 +102,6 @@ public class VendingMachine {
     }
 
     public ArrayList<Slot> getSlots() { return slots; }
-    public int getSlotCapacity() { return slotCapacity; }
-    public ArrayList<Transaction> getTransactions() { return transactions; }
 
     // ====== Slot Management ======
 
