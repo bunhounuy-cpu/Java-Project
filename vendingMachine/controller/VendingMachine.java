@@ -102,6 +102,10 @@ public class VendingMachine {
     }
 
     public ArrayList<Slot> getSlots() { return slots; }
+    public ArrayList<Transaction> getTransactions() {
+        if (!requirePermission(VIEW_TRANSACTIONS)) return new ArrayList<>();
+        return transactions;
+    }
 
     // ====== Slot Management ======
 
