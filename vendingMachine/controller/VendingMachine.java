@@ -18,16 +18,18 @@ public class VendingMachine {
     public static final String VIEW_MENU         = "VIEW_MENU";
     public static final String RESTOCK           = "RESTOCK";
     public static final String VIEW_REVENUE      = "VIEW_REVENUE";
+    public static final String MANAGE_PRODUCTS   = "MANAGE_PRODUCTS";
     public static final String VIEW_TRANSACTIONS = "VIEW_TRANSACTIONS";
     public static final String VIEW_INVENTORY    = "VIEW_INVENTORY";
     public static final String VIEW_BALANCE      = "VIEW_BALANCE";
     public static final String TOP_UP            = "TOP_UP";
-    public static final String ADD_SLOT          = "ADD_SLOT";
-    public static final String REMOVE_SLOT       = "REMOVE_SLOT";
+    public static final String ADD_NEW_PRODUCT          = "ADD_NEW_PRODUCT";
+    public static final String REMOVE_PRODUCT       = "REMOVE_PRODUCT";
     public static final String CHANGE_PRODUCT    = "CHANGE_PRODUCT";
 
     private String location;
     private int capacity;
+    private int slotCapacity;
     private ArrayList<Slot> slots;
     private double revenue;
     private ArrayList<Transaction> transactions;
@@ -37,11 +39,12 @@ public class VendingMachine {
     private static int machineCount = 0;
 
     // ====== Constructor ======
-    public VendingMachine(String location, int capacity) throws VendingMachineException {
+    public VendingMachine(String location, int capacity, int slotCapacity) throws VendingMachineException {
         try {
             machineCount++;
             setLocation(location);
             setCapacity(capacity);
+            setSlotCapacity(slotCapacity);
             setSlots(new ArrayList<>());
             setRevenue(0.0);
             setTransactions(new ArrayList<>());
@@ -99,18 +102,21 @@ public class VendingMachine {
     }
 
     public ArrayList<Slot> getSlots() { return slots; }
+    public int getSlotCapacity() { return slotCapacity; }
+    public ArrayList<Transaction> getTransactions() { return transactions; }
 
     // ====== Slot Management ======
 
     /**
      * Add a brand-new slot with a new product.
-     * Requires ADD_SLOT permission.
+     * Requires ADD_NEW_PRODUCT permission.
      */
     public void addSlot(String slotID, Product product, int quantity) throws VendingMachineException {
-        if (!requirePermission(ADD_SLOT)) return;
+        if (!requirePermission(ADD_NEW_PRODUCT)) return;
         if (isBlank(slotID))         throw new InvalidInputException("Slot ID cannot be empty");
         if (product == null)         throw new InvalidInputException("Product cannot be null");
         if (quantity < 0)            throw new InvalidInputException("Quantity cannot be negative");
+        if (quantity > slotCapacity) throw new InvalidInputException("Quantity cannot exceed slot capacity of " + slotCapacity);
         if (findSlot(slotID) != null)throw new InvalidInputException("Slot '" + slotID + "' already exists");
         if (slots.size() >= capacity)throw new VendingMachineException("Machine is full (" + capacity + " slots max)");
 
@@ -120,10 +126,10 @@ public class VendingMachine {
 
     /**
      * Remove a slot entirely.
-     * Requires REMOVE_SLOT permission.
+     * Requires REMOVE_PRODUCT permission.
      */
     public void removeSlot(String slotID) throws VendingMachineException {
-        if (!requirePermission(REMOVE_SLOT)) return;
+        if (!requirePermission(REMOVE_PRODUCT)) return;
         if (isBlank(slotID)) throw new InvalidInputException("Slot ID cannot be empty");
 
         Slot s = findSlot(slotID);
@@ -143,6 +149,7 @@ public class VendingMachine {
         if (isBlank(slotID))    throw new InvalidInputException("Slot ID cannot be empty");
         if (newProduct == null) throw new InvalidInputException("Product cannot be null");
         if (newQuantity < 0)    throw new InvalidInputException("Quantity cannot be negative");
+        if (newQuantity > slotCapacity) throw new InvalidInputException("Quantity cannot exceed slot capacity of " + slotCapacity);
 
         Slot s = findSlot(slotID);
         if (s == null) throw new ProductNotFoundException("Slot not found: " + slotID, slotID);
@@ -161,6 +168,10 @@ public class VendingMachine {
 
         Slot s = findSlot(slotID);
         if (s == null) throw new ProductNotFoundException("Slot not found: " + slotID, slotID);
+
+        if (s.getQuantity() + amount > slotCapacity) {
+            throw new InvalidInputException("Restock would exceed slot capacity of " + slotCapacity + ". Current: " + s.getQuantity() + ", attempted: +" + amount);
+        }
 
         s.addQuantity(amount);
         System.out.println("Restocked slot " + slotID + " +" + amount + ". New qty: " + s.getQuantity());
@@ -199,6 +210,12 @@ public class VendingMachine {
         revenue += totalPrice;
         for (int i = 0; i < quantity; i++) customer.incrementItems();
 
+        // Remove slot completely if quantity reaches 0
+        if (s.getQuantity() == 0) {
+            slots.remove(s);
+            System.out.println("Slot " + slotID + " removed - product out of stock.");
+        }
+
         Transaction t = new Transaction(customer, location);
         t.saveTransaction(slotID, s.getProduct().getName() + " (x" + quantity + ")", totalPrice);
         transactions.add(t);
@@ -221,7 +238,7 @@ public class VendingMachine {
     public void printInventory() {
         System.out.println("=== " + location + " Inventory ===");
         if (slots.isEmpty()) { System.out.println("  No slots found."); return; }
-        for (Slot s : slots) { if (s != null) System.out.println("  " + s.toString()); }
+        for (Slot s : slots) { if (s != null && s.getQuantity() < slotCapacity ) System.out.println("  " + s.toString()); }
     }
 
     public void printTransactions() {
@@ -271,6 +288,10 @@ public class VendingMachine {
     public void setCapacity(int capacity) throws InvalidInputException {
         if (capacity > 0) this.capacity = capacity;
         else throw new InvalidInputException("Capacity must be positive");
+    }
+    public void setSlotCapacity(int slotCapacity) throws InvalidInputException {
+        if (slotCapacity > 0) this.slotCapacity = slotCapacity;
+        else throw new InvalidInputException("Slot capacity must be positive");
     }
     public void setSlots(ArrayList<Slot> slots)               { this.slots = slots; }
     public void setTransactions(ArrayList<Transaction> t)     { this.transactions = t; }

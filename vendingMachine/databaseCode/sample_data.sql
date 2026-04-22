@@ -41,10 +41,10 @@ INSERT INTO vending_machines (location, status) VALUES
 INSERT INTO slots (slot_id, machine_id, product_id, quantity) VALUES
 ('A1', 1, 1, 10),  -- Coca Cola
 ('A2', 1, 2, 8),   -- Pepsi
-('A3', 1, 3, 15),  -- Water Bottle
-('B1', 1, 4, 12),  -- Chips
+('A3', 1, 3, 10),  -- Water Bottle
+('B1', 1, 4, 10),  -- Chips
 ('B2', 1, 5, 6),   -- Chocolate Bar
-('B3', 1, 6, 20),  -- Gum
+('B3', 1, 6, 10),  -- Gum
 ('C1', 1, 7, 4),   -- Sandwich
 ('C2', 1, 8, 10);  -- Cookies
 
@@ -53,11 +53,11 @@ INSERT INTO slots (slot_id, machine_id, product_id, quantity) VALUES
 ('A1', 2, 1, 5),   -- Coca Cola
 ('A2', 2, 3, 10),  -- Water Bottle
 ('B1', 2, 4, 8),   -- Chips
-('B2', 2, 6, 15);  -- Gum
+('B2', 2, 6, 10);  -- Gum
 
 -- Insert Slots (Machine 3 - Gym Area)
 INSERT INTO slots (slot_id, machine_id, product_id, quantity) VALUES
-('A1', 3, 3, 20),  -- Water Bottle
+('A1', 3, 3, 10),  -- Water Bottle
 ('A2', 3, 1, 8),   -- Coca Cola
 ('B1', 3, 7, 6),   -- Sandwich
 ('B2', 3, 4, 10);  -- Chips

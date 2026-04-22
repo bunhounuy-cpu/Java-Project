@@ -12,8 +12,8 @@ public class Restocker extends User {
             case "VIEW_MENU":
             case "VIEW_INVENTORY":
             case "RESTOCK":
-            case "ADD_SLOT":
-            case "REMOVE_SLOT":
+            case "ADD_NEW_PRODUCT":
+            case "REMOVE_PRODUCT":
             case "CHANGE_PRODUCT":
             case "PURCHASE":
             case "VIEW_BALANCE":
@@ -25,7 +25,8 @@ public class Restocker extends User {
         }
     }
 
-    public Restocker(String userId, String fullName, String phone, String username, String password, float salary) throws InvalidInputException {
+    public Restocker(String userId, String fullName, String phone,
+                     String username, String password, float salary) throws InvalidInputException {
         super(userId, fullName, phone, username, password);
         setRestockerSalary(salary);
     }
